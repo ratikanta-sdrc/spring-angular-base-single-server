@@ -1,14 +1,17 @@
 package org.sdrc.repository;
 
+import java.util.Optional;
+
 import org.sdrc.domain.User;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+/**
+ * 
+ * @author ratikanta@sdrc.co.in
+ *
+ */
 public interface UserRepository extends JpaRepository<User, Long> {
-
-	@Cacheable("users")
-	User findByUserName(String username);
-
 	
+	Optional<User> findByUserName(String username);	
 
 }

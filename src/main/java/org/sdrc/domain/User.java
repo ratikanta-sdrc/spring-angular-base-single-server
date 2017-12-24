@@ -1,17 +1,19 @@
 package org.sdrc.domain;
 
 import java.io.Serializable;
-import java.util.Collection;
+import java.util.Set;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Transient;
-
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 /**
  * 
@@ -22,12 +24,14 @@ import org.springframework.security.core.userdetails.UserDetails;
  *         requires Hibernate session to load lazy collections.
  * 
  *         If you want to, then try to load all lazy class with EntityGraph
+ * 
+ * @author ratikanta@sdrc.co.in         
  *
  */
 
 @Entity
 @Table(name = "user_tbl")
-public class User implements Serializable, UserDetails {
+public class User implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -35,8 +39,6 @@ public class User implements Serializable, UserDetails {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "user_id")
 	private Integer userId;
-
-	@Column
 	private String name;
 
 	@Column(name = "user_name")
@@ -55,9 +57,23 @@ public class User implements Serializable, UserDetails {
 
 	@Column(name = "locked", columnDefinition = "boolean DEFAULT false")
 	private boolean locked;
+	
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"), 
+			inverseJoinColumns = @JoinColumn(name = "role_id"))
+	private Set<Role> roles;
+	
 
-	@Transient
-	private Collection<GrantedAuthority> authorities;
+	public User(){}
+	
+	public User(User user){
+		
+		this.userId = user.userId;		
+		this.userName = user.userName;
+		this.password = user.password;
+		this.name = user.name;
+		this.roles = user.roles;		
+	}
 
 	public String getPassword() {
 		return password;
@@ -99,10 +115,6 @@ public class User implements Serializable, UserDetails {
 		this.locked = locked;
 	}
 
-	public void setAuthorities(Collection<GrantedAuthority> authorities) {
-		this.authorities = authorities;
-	}
-
 	public Integer getUserId() {
 		return userId;
 	}
@@ -125,34 +137,13 @@ public class User implements Serializable, UserDetails {
 
 	public void setUserName(String userName) {
 		this.userName = userName;
+	}	
+
+	public Set<Role> getRoles() {
+		return roles;
 	}
 
-	@Override
-	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return this.authorities;
-	}
-
-	@Override
-	public String getUsername() {
-		return this.userName;
-	}
-
-	@Override
-	public boolean isAccountNonExpired() {
-		return !this.expired;
-	}
-
-	@Override
-	public boolean isAccountNonLocked() {
-		return !this.locked;
-	}
-
-	@Override
-	public boolean isCredentialsNonExpired() {
-		return true;
-	}
-
-	public User() {
-
+	public void setRoles(Set<Role> roles) {
+		this.roles = roles;
 	}
 }
